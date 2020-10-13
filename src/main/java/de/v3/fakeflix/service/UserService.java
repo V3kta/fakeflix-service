@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class UserService {
@@ -23,22 +25,34 @@ public class UserService {
     }
 
     public Boolean checkData(LoginDataDTO loginData) {
-        return userRepository.existsByUsernameOrEmailAndPassword(loginData.getLogin(), loginData.getLogin(), loginData.getPassword());
+        if (loginData.getLogin().contains("@")) {
+            return userRepository.existsByEmailAndPassword(loginData.getLogin(), loginData.getPassword());
+        }
+        return userRepository.existsByUsernameAndPassword(loginData.getLogin(), loginData.getPassword());
     }
 
     public Boolean checkData(RegisterDataDTO registerData) {
-        return userRepository.existsByUsername(registerData.getUsername());
+        return userRepository.existsByUsernameOrEmail(registerData.getUsername(), registerData.getEmail());
     }
 
     public UserDTO getUser(LoginDataDTO loginData) {
         ModelMapper modelMapper = new ModelMapper();
+        Optional<User> OptUser;
 
-        User user = userRepository.findByUsernameOrEmailAndPassword(loginData.getLogin(), loginData.getLogin(), loginData.getPassword());
+        if (loginData.getLogin().contains("@")) {
+            OptUser = userRepository.findByEmailAndPassword(loginData.getLogin(), loginData.getPassword());
+        } else {
+            OptUser = userRepository.findByUsernameAndPassword(loginData.getLogin(), loginData.getPassword());
+        }
 
-        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        return OptUser.map(user -> modelMapper.map(user, UserDTO.class)).orElse(null);
 
-        log.info(userDTO.getEmail());
+    }
 
-        return userDTO;
+    public void saveUser(RegisterDataDTO registerDataDTO) {
+        ModelMapper modelMapper = new ModelMapper();
+        User user = modelMapper.map(registerDataDTO, User.class);
+
+        userRepository.save(user);
     }
 }
