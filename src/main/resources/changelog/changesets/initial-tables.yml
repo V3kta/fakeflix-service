@@ -1,0 +1,30 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: user_table_creation
+      author: lrasche
+      changes:
+        - createTable:
+            tableName: user
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(255)
+              - column:
+                  name: email
+                  type: varchar(255)
+              - column:
+                  name: password
+                  type: varchar(255)
+              - column:
+                  name: firstName
+                  type: varchar(255)
+              - column:
+                  name: lastName
+                  type: varchar(255)
